@@ -6,3 +6,12 @@
 
 # Ignore the TODO file
 TODO.txt
+
+# Ignore data arhives.
+*.zip
+*.pbf
+data
+
+# Added by ML
+git_push.sh
+git_prep.sh
