@@ -6,8 +6,9 @@ import fiona
 import os
 import itertools
 import numpy as np
-from io_util import get_file_name
-from config import WGS84_DIR
+
+from .io_util import get_file_name
+from .config import WGS84_DIR
 
 
 def reproject_dataset(geotiff_path):
@@ -113,7 +114,7 @@ def create_shapefile(bitmap, raster_dataset, out_path):
     """TODO: Docstring."""
 
     shapes = rasterio.features.shapes(bitmap, transform=raster_dataset.transform)
-    records = map(lambda (geom, _): {"geometry": geom, "properties": {}}, shapes)
+    records = map(lambda geom, _: {"geometry": geom, "properties": {}}, shapes)
     schema = {
         "geometry": "Polygon",
         "properties": {}
@@ -128,7 +129,7 @@ def visualise_labels(labels, tile_size, out_path):
 
     # The tiles might come from different satellite images so we have to
     # group them according to their source image.
-    get_path = lambda (tiles, pos, path): path
+    get_path = lambda tiles, pos, path: path
     sorted_by_path = sorted(labels, key=get_path)
     for path, predictions in itertools.groupby(sorted_by_path, get_path):
         raster_dataset = rasterio.open(path)
@@ -147,11 +148,11 @@ def visualise_results(results, tile_size, out_path, out_format="GeoTIFF"):
 
     # The tiles of the predictions, false positives and labels are all in "results".
     # We need ways to get extract them individually to pass them to overlay_bitmap.
-    get_predictions = lambda (tiles, pos, path): (tiles[0], pos, path)
-    get_labels = lambda (tiles, pos, path): (tiles[1], pos, path)
-    get_false_positives =  lambda (tiles, pos, path): (tiles[2], pos, path)
+    get_predictions = lambda tiles, pos, path: (tiles[0], pos, path)
+    get_labels = lambda tiles, pos, path: (tiles[1], pos, path)
+    get_false_positives =  lambda tiles, pos, path: (tiles[2], pos, path)
 
-    get_path = lambda (tiles,pos , path): path
+    get_path = lambda tiles,pos , path: path
     sorted_by_path = sorted(results, key=get_path)
     for path, result_tiles in itertools.groupby(sorted_by_path, get_path):
         raster_dataset = rasterio.open(path)

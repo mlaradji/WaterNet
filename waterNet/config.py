@@ -24,14 +24,14 @@ OUTPUT_DIR = join(DATA_DIR, "output")
 TENSORBOARD_DIR = join(OUTPUT_DIR, "tensorboard")
 
 # Paths to the shapefiles.
-MUENSTER_SHAPEFILE = join(SHAPEFILE_DIR, "muenster-regbez-latest-free", "gis.osm_water_a_free_1.shp")
-NETHERLANDS_SHAPEFILE = join(SHAPEFILE_DIR, "netherlands-latest-free", "gis.osm_water_a_free_1.shp")
-NRW_SHAPEFILE = join(SHAPEFILE_DIR, "nordrhein-westfalen-latest-free", "gis.osm_water_a_free_1.shp")
+MUENSTER_SHAPEFILE = join(SHAPEFILE_DIR, "muenster-regbez-latest-free", "gis_osm_water_a_free_1.shp")
+NETHERLANDS_SHAPEFILE = join(SHAPEFILE_DIR, "netherlands-latest-free", "gis_osm_water_a_free_1.shp")
+NRW_SHAPEFILE = join(SHAPEFILE_DIR, "nordrhein-westfalen-latest-free", "gis_osm_water_a_free_1.shp")
 OCEAN_SHAPEFILE = join(SHAPEFILE_DIR, "water-polygons-split-4326", "water_polygons.shp")
-BAYERN_SHAPEFILE = join(SHAPEFILE_DIR, "bayern-latest-free", "gis.osm_water_a_free_1.shp")
-ENGLAND_SHAPEFILE = join(SHAPEFILE_DIR, "england-latest-free", "gis.osm_water_a_free_1.shp")
-HUNGARY_SHAPEFILE = join(SHAPEFILE_DIR, "hungary-latest-free", "gis.osm_water_a_free_1.shp")
-VENICE_SHAPEFILE = join(SHAPEFILE_DIR, "nord-est-latest-free", "gis.osm_water_a_free_1.shp")
+BAYERN_SHAPEFILE = join(SHAPEFILE_DIR, "bayern-latest-free", "gis_osm_water_a_free_1.shp")
+ENGLAND_SHAPEFILE = join(SHAPEFILE_DIR, "england-latest-free", "gis_osm_water_a_free_1.shp")
+HUNGARY_SHAPEFILE = join(SHAPEFILE_DIR, "hungary-latest-free", "gis_osm_water_a_free_1.shp")
+VENICE_SHAPEFILE = join(SHAPEFILE_DIR, "nord-est-latest-free", "gis_osm_water_a_free_1.shp")
 
 # Paths to the satellite images.
 MUENSTER_SATELLITE = join(SENTINEL_DIR, "S2A_OPER_MSI_L1C_TL_SGS__20161204T105758_20161204T143433_A007584_T32ULC_N02_04_01.tif")

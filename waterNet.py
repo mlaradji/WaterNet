@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import time
 import os
 import sys
+
 from waterNet.config import DATASETS, OUTPUT_DIR, TRAIN_DATA_DIR, LABELS_DIR
 from waterNet.preprocessing import preprocess_data
 from waterNet.model import init_model, train_model, compile_model
@@ -171,6 +172,7 @@ def main():
 
     if args.init_model:
         model = init_model(args.tile_size, model_id, **dict(hyperparameters))
+        model.summary
         save_model_summary(hyperparameters, model, model_dir)
     elif args.train_model or args.evaluate_model:
         hyperparameters = dict(hyperparameters)
@@ -184,7 +186,7 @@ def main():
             labels_train,
             args.tile_size,
             model_id,
-            nb_epoch=args.epochs,
+            epochs=args.epochs,
             checkpoints=args.checkpoints,
             tensorboard=args.tensorboard)
 

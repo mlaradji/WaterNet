@@ -1,4 +1,4 @@
-"""Transform GeoTIFF images and OSM shapefiles into feature and label matrixes which can be use
+"""Transform GeoTIFF images and OSM shapefiles into feature and label matrixes which can be used
 to train the ConvNet"""
 
 import fiona
@@ -8,9 +8,10 @@ import rasterio.features
 import rasterio.warp
 import os
 import sys
-from config import TILES_DIR, WATER_BITMAPS_DIR
-from geo_util import create_tiles, reproject_dataset
-from io_util import get_file_name, save_tiles, save_tiles, save_bitmap, load_bitmap
+
+from .config import TILES_DIR, WATER_BITMAPS_DIR
+from .geo_util import create_tiles, reproject_dataset
+from .io_util import get_file_name, save_tiles, save_tiles, save_bitmap, load_bitmap
 import numpy as np
 
 
@@ -59,7 +60,7 @@ def create_tiled_features_and_labels(geotiff_path,
     cache_path = os.path.join(TILES_DIR, cache_file_name)
     try:
         print("Load tiles from {}.".format(cache_path))
-        with open(cache_path) as f:
+        with open(cache_path, 'rb') as f:
             tiles = pickle.load(f)
 
         return tiles["features"], tiles["labels"]

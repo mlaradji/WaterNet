@@ -6,7 +6,8 @@ import sys
 import errno
 import pickle
 import keras.models
-from config import TILES_DIR, WATER_BITMAPS_DIR, WGS84_DIR, LABELS_DIR, MODELS_DIR, OUTPUT_DIR, TENSORBOARD_DIR
+
+from .config import TILES_DIR, WATER_BITMAPS_DIR, WGS84_DIR, LABELS_DIR, MODELS_DIR, OUTPUT_DIR, TENSORBOARD_DIR
 
 def create_directories():
     """Create all the directories in the /data directories which are used for preprocessing/training/evaluating."""
@@ -40,13 +41,13 @@ def save_model_summary(hyperparameters, model, path):
 
     with open(os.path.join(path, "hyperparameters.txt"), "wb") as out:
         for parameter, value in hyperparameters:
-            out.write("{}: {}\n".format(parameter, value))
+            out.write("{}: {}\n".format(parameter, value).encode())
 
         # model.summary() prints to stdout. Because we want to write the
         # summary to a file we have to set the stdout to the file.
         stdout = sys.stdout
         sys.stdout = out
-        model.summary()
+        model.summary
         sys.stdout = stdout
 
 

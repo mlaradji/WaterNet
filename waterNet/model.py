@@ -7,8 +7,9 @@ from keras.optimizers import SGD
 from keras.callbacks import ModelCheckpoint, TensorBoard
 import os
 import numpy as np
-from config import MODELS_DIR, TENSORBOARD_DIR
-from io_util import save_makedirs, save_model
+
+from .config import MODELS_DIR, TENSORBOARD_DIR
+from .io_util import save_makedirs, save_model
 
 
 def train_model(model,
@@ -16,7 +17,7 @@ def train_model(model,
                 labels,
                 tile_size,
                 model_id,
-                nb_epoch=10,
+                epochs=10,
                 checkpoints=False,
                 tensorboard=False):
     """Train a model with the given features and labels."""
@@ -45,7 +46,7 @@ def train_model(model,
     callbacks = [c for c in [checkpointer, tensorboarder] if c]
 
     print("Start training.")
-    model.fit(X, y, nb_epoch=nb_epoch, callbacks=callbacks, validation_split=0.1)
+    model.fit(X, y, epochs=epochs, callbacks=callbacks, validation_split=0.1)
 
     save_model(model, model_dir)
     return model

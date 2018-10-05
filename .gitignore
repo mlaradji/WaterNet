@@ -1,6 +1,6 @@
 # Ignore IPython notebook 
 .ipynb_checkpoints
-*.ipynb
+#*.ipynb
 
 *.pyc
 
@@ -11,8 +11,3 @@ TODO.txt
 *.zip
 *.pbf
 data
-
-# Added by ML
-git_push.sh
-git_prep.sh
-wget*
