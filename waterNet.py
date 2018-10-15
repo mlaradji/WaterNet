@@ -137,8 +137,8 @@ def create_parser():
         "--hp-sweep-epochs",
         dest="hp_sweep_epochs",
         type=int,
-        default=10,
-        help="The number of epochs to train per set of hyperparameters. Default is 10."
+        default=100,
+        help="The number of epochs to train per set of hyperparameters. Default is 100."
         )
 
     return parser

@@ -120,6 +120,7 @@ def objective(source_model, hyperparameters, features, labels, epochs = 10):
     # First, initialize the model, getting values from source_model.
     model = source_model.spawn_child(excluded_attributes = {'model', 'hyperparameters'}, subdir = 'hp_sweep')
     
+    # Run each training session in their own TensorFlow session. This seems to be necessary for proper GPU memory management.
     with tf.Session() as session:
         # Initialize the model with the hyperparameters.
         model.init(
