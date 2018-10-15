@@ -9,6 +9,8 @@ from . import misc
 
 import os
 
+import tensorflow as tf
+
 
 def preset(nb_layers):
     '''
@@ -118,26 +120,27 @@ def objective(source_model, hyperparameters, features, labels, epochs = 10):
     # First, initialize the model, getting values from source_model.
     model = source_model.spawn_child(excluded_attributes = {'model', 'hyperparameters'}, subdir = 'hp_sweep')
     
-    # Initialize the model with the hyperparameters.
-    model.init(
-        hyperparameters = hyperparameters
-    )
-    
-    # Next, train the model on the set number of epochs, and save the history.
-    history = model.train(
-        features, 
-        labels, 
-        epochs = epochs
-    )
-    
-    # Finally, use the loss value of the final epoch. This might use some fine-tuning, perhaps instead using the average loss or the minimum loss.
-    loss = history.history['loss'][-1]
-    
-    # Remove the model from memory to save space.
-    model_dir = model.model_dir
-    model.unload_model()
-    #del model
-    print("The model at '" + model_dir + " was unloaded from memory.")
-    misc.print_line()
+    with tf.Session() as session:
+        # Initialize the model with the hyperparameters.
+        model.init(
+            hyperparameters = hyperparameters
+        )
+
+        # Next, train the model on the set number of epochs, and save the history.
+        history = model.train(
+            features, 
+            labels, 
+            epochs = epochs
+        )
+
+        # Finally, use the loss value of the final epoch. This might use some fine-tuning, perhaps instead using the average loss or the minimum loss.
+        loss = history.history['loss'][-1]
+
+        # Remove the model from memory to save space.
+        model_dir = model.model_dir
+        model.unload_model()
+        #del model
+        print("The model at '" + model_dir + " was unloaded from memory.")
+        misc.print_line()
     
     return loss

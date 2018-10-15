@@ -83,10 +83,11 @@ def save_bitmap(file_path, image, source):
         dst.write(image, indexes=1)
 
 
-def load_model(model_id):
+def load_model(model_id, model_dir = None):
     """Load a keras model and its weights with the given ID."""
 
-    model_dir = os.path.join(MODELS_DIR, model_id)
+    if model_dir is None:
+        model_dir = os.path.join(MODELS_DIR, model_id)
 
     print("Load model in {}.".format(model_dir))
     model_file = os.path.join(model_dir, "model.json")

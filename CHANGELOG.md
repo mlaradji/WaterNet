@@ -18,6 +18,7 @@ Notes:
 - Added the Model class.
 
 ### Changed
+- Updated `requirements.txt`.
 - Delegated saving functions to the Model class.
 - Switched code to Python 3.6. The code is probably no longer useable in Python<3.
 - Moved `nb_layers` to the `hyperparameters` dict.
@@ -31,10 +32,3 @@ Notes:
 ### Fixed
 
 ### Security
-
-### Future (Priority #)
-- Make `waterNet` useable with other datasets. (3)
-- Include `nb_layers` (number of CNN layers) in the hyperparameter sweep. (2)
-- Select appropriate hyperparameter distributions at runtime. Currently, they are hard-coded. (2)
-- Make the code self-contained as a module, that can be imported into other Python scripts. Currently, importing this project is buggy. (1)
-- Make the terminal output more readable. (1)

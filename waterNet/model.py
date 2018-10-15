@@ -297,15 +297,18 @@ class Model(object):
         The model self.model can take up quite a bit of memory. This function can be used to unload it.
         '''
         
+        import gc
+        
         del self.model
         
+        gc.collect()
         
     def load_model(self):
         '''
         This loads the model in self.model_dir into self.model.
         '''
         
-        self.model = io_util.load_model(self.model_id)
+        self.model = io_util.load_model(self.model_id, self.model_dir)
         
                   
     def save(self, save_pickle = False):
