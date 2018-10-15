@@ -1,10 +1,15 @@
 import os
 from os.path import join
 
+from collections import OrderedDict
+
 # Specify where the program can find the data.
-DATA_DIR = os.environ["DATA_DIR"]
-
-
+try:
+    DATA_DIR = os.environ["DATA_DIR"]
+except KeyError:
+    DATA_DIR = os.environ["DATA_DIR"] = 'data'
+    print("Using 'data' as the data directory.")
+    
 # Directories which contain satellite imagery and shapefiles.
 SENTINEL_DIR = join(DATA_DIR, "input", "Sentinel-2")
 SHAPEFILE_DIR = join(DATA_DIR, "input", "Shapefiles")
@@ -63,3 +68,32 @@ DEBUG_DATASET = {
 
 DATASETS = {"sentinel": SENTINEL_DATASET, "debug": DEBUG_DATASET}
 
+
+# Default hyperparameters for the model. Since there are so many of them it is
+# more convenient to set them in the source code as opposed to passing
+# them as arguments to the CLI. We use an OrderedDict since we want to print the hyperparameters and for that purpose
+# keep them in the predefined order.
+
+HYPERPARAMETERS = OrderedDict([
+    # Hyperparameters for Stochastic Gradient Descent.
+    ("learning_rate", 0.005),
+    ("momentum", 0.9),
+    ("decay", 0.002),
+    
+    # Number of CNN layers.
+    ("nb_layers", 1),
+    
+    # Hyperparameters for the first convolutional layer.
+    ("nb_filters_1", 64),
+    ("filter_size_1", 7),
+    ("stride_1", (3, 3)),
+    
+    # Hyperparameter for the first pooling layer.
+    ("pool_size_1", (4, 4)),
+    
+    # Hyperparameters for the second convolutional layer (when two layer
+    # architecture is used).
+    ("nb_filters_2", 128),
+    ("filter_size_2", 3),
+    ("stride_2", (2, 2)),
+])

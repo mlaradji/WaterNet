@@ -1,13 +1,24 @@
-# Ignore IPython notebook 
+# Ignore IPython notebook. 
 .ipynb_checkpoints
 #*.ipynb
+testing.ipynb
 
+# Ignore compiled Python files.
 *.pyc
 
-# Ignore the TODO file
+# Ignore the TODO file.
 TODO.txt
 
 # Ignore data arhives.
 *.zip
 *.pbf
-data
+data/
+
+# Ignore autokeras module.
+autokeras/
+
+# Ignore old files.
+*.old
+
+# Ignore logs.
+*.log

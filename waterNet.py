@@ -5,13 +5,7 @@ import time
 import os
 import sys
 
-from waterNet.config import DATASETS, OUTPUT_DIR, TRAIN_DATA_DIR, LABELS_DIR
-from waterNet.preprocessing import preprocess_data
-from waterNet.model import init_model, train_model, compile_model
-from waterNet.evaluation import evaluate_model
-from waterNet.io_util import save_makedirs, save_model_summary, load_model, create_directories
-from waterNet.geo_util import visualise_labels
-
+import waterNet.hyperparameters as hp
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Train a convolutional neural network to predict water in satellite images.")
@@ -51,12 +45,13 @@ def create_parser():
         const=True,
         default=False,
         help="Run on a small test dataset.")
-    parser.add_argument(
-        "-a, --architecture",
-        dest="architecture",
-        default="one_layer",
-        choices=["one_layer", "two_layer"],
-        help="Neural net architecture.")
+ #   parser.add_argument(
+ #       "-a, --architecture",
+ #       dest="architecture",
+ #       default="one_layer",
+ #       choices=["one_layer", "two_layer"],
+ #       help="Neural net architecture.")
+    
     parser.add_argument(
         "-v, --visualise",
         dest="visualise",
@@ -83,8 +78,19 @@ def create_parser():
         default="sentinel",
         choices=["sentinel"],
         help="Determine which dataset to use.")
+    
+    parser.add_argument(
+        "--nb-layers",
+        dest="nb_layers",
+        type=int,
+        default=1,
+        help="The number of layers to use in the neural network. Default is 1."
+        )
+        
     parser.add_argument(
         "--tile-size", default=64, type=int, help="Choose the tile size.")
+    parser.add_argument(
+        "--num-channels", default=3, type=int, help="Set the number of channels in the dataset.")
     parser.add_argument(
         "--epochs", default=10, type=int, help="Number of training epochs.")
     parser.add_argument(
@@ -103,14 +109,56 @@ def create_parser():
         default="GeoTIFF",
         choices=["GeoTIFF", "Shapefile"],
         help="Determine the format of the output for the evaluation method.")
+    
+    parser.add_argument(
+        "--data-dir",
+        default="data",
+        type=str,
+        help="Set the data directory, relative to where waterNet.py is being run. Default is 'data'.")
+    
+    parser.add_argument(
+        "--hp-sweep",
+        default=False,
+        #type=bool,
+        action="store_const",
+        const=True,
+        help="WaterNet defaults to using the preset hyperparameters (defined in waterNet/config.py). Use the '--hp-sweep' argument to do a hyperparameter sweep (run small training runs to determine the best hyperparameters)."
+    )
+    
+    parser.add_argument(
+        "--hp-sweep-evals",
+        dest="hp_sweep_evals",
+        type=int,
+        default=100,
+        help="The number of sets of hyperparameters to test during the sweep. Default is 100."
+        )
+    
+    parser.add_argument(
+        "--hp-sweep-epochs",
+        dest="hp_sweep_epochs",
+        type=int,
+        default=10,
+        help="The number of epochs to train per set of hyperparameters. Default is 10."
+        )
 
     return parser
 
 
 def main():
+    
     parser = create_parser()
     args = parser.parse_args()
+    
+    os.environ['DATA_DIR'] = args.data_dir
+    
+    from waterNet.config import DATASETS, OUTPUT_DIR, TRAIN_DATA_DIR, LABELS_DIR, MODELS_DIR, HYPERPARAMETERS
+    from waterNet.preprocessing import preprocess_data
+    from waterNet.model import init_model, train_model, compile_model, Model
+    from waterNet.evaluation import evaluate_model
+    from waterNet.io_util import save_makedirs, save_model_summary, load_model, create_directories
+    from waterNet.geo_util import visualise_labels
 
+  
     if args.setup:
         create_directories()
 
@@ -121,6 +169,7 @@ def main():
             args.tile_size, dataset=dataset)
         features_train, features_test = features[:100], features[100:120]
         labels_train, labels_test = labels[:100], labels[100:120]
+    
     elif args.train_model or args.evaluate_model or args.preprocess_data:
         dataset = DATASETS[args.dataset]
         load_from_cache = not args.preprocess_data
@@ -133,66 +182,74 @@ def main():
 
         if args.visualise:
             visualise_labels(labels_train, args.tile_size, LABELS_DIR)
-            visualise_labels(labels_test, args.tile_size, LABELS_DIR)
-
+            visualise_labels(labels_test, args.tile_size, LABELS_DIR) 
+    
     if not args.model_id:
-        timestamp = time.strftime("%d_%m_%Y_%H%M")
-        model_id = "{}_{}_{}".format(timestamp, args.dataset, args.architecture)
+        timestamp = time.strftime("%d_%m_%Y_%H%M%S")
+        model_id = "{}_{}_{}".format(timestamp, args.dataset, str(args.nb_layers)+'L')
+        only_load_model = False
     else:
         model_id = args.model_id
-
+        only_load_model = True # only_load_model is used to stop Model() from creating the model if it did not exist.
+    
+    
     if args.init_model or args.train_model or args.evaluate_model:
-        model_dir = os.path.join(OUTPUT_DIR, model_id)
-        save_makedirs(model_dir)
+        model = Model(
+            model_id = model_id, 
+            models_dir = MODELS_DIR,
+            only_load = only_load_model,
+            dataset = dataset,
+            tile_size = args.tile_size,
+            num_channels = args.num_channels
+        ) 
+        
+    if args.hp_sweep:
+        
+        print('Running a hyperparameter sweep for ' + str(args.hp_sweep_evals) + ' sets of hyperparameters, with ' + str(args.hp_sweep_epochs) + ' training epochs per set.')
+        
+        hyperparameters = hp.find_best(
+            source_model = model,
+            features = features_train, 
+            labels = labels_train, 
+            nb_layers = args.nb_layers, 
+            max_evals = args.hp_sweep_evals, 
+            epochs_per_eval = args.hp_sweep_epochs,
+        )
+        
+        print('Successfully completed the hyperparameter sweep. The best performing hyperparameters are: ')
+        print(hyperparameters)
 
-
-    # Hyperparameters for the model. Since there are so many of them it is
-    # more convenient to set them in the source code as opposed to passing
-    # them as arguments to the CLI. We use a list of tuples instead of a
-    # dict since we want to print the hyperparameters and for that purpose
-    # keep them in the predefined order.
-    hyperparameters = [
-        ("architecture", args.architecture),
-        # Hyperparameters for the first convolutional layer.
-        ("nb_filters_1", 64),
-        ("filter_size_1", 7),
-        ("stride_1", (3, 3)),
-        # Hyperparameter for the first pooling layer.
-        ("pool_size_1", (4, 4)),
-        # Hyperparameters for the second convolutional layer (when two layer
-        # architecture is used).
-        ("nb_filters_2", 128),
-        ("filter_size_2", 3),
-        ("stride_2", (2, 2)),
-        # Hyperparameters for Stochastic Gradient Descent.
-        ("learning_rate", 0.005),
-        ("momentum", 0.9),
-        ("decay", 0.002)
-    ]
+    else:
+        hyperparameters = HYPERPARAMETERS
+        hyperparameters['nb_layers'] = args.nb_layers
+       
 
     if args.init_model:
-        model = init_model(args.tile_size, model_id, **dict(hyperparameters))
-        model.summary
-        save_model_summary(hyperparameters, model, model_dir)
+        model.init(
+            hyperparameters = hyperparameters, 
+        )
+        model.summary()
+        
     elif args.train_model or args.evaluate_model:
-        hyperparameters = dict(hyperparameters)
-        model = load_model(model_id)
-        model = compile_model(model, hyperparameters["learning_rate"], hyperparameters["momentum"], hyperparameters["decay"])
+        model.compile()
 
     if args.train_model:
-        model = train_model(
-            model,
-            features_train,
-            labels_train,
-            args.tile_size,
-            model_id,
-            epochs=args.epochs,
-            checkpoints=args.checkpoints,
-            tensorboard=args.tensorboard)
+        model.train(
+            features_train, 
+            labels_train, 
+            epochs = args.epochs, 
+            checkpoints = args.checkpoints, 
+            tensorboard = args.tensorboard
+        )
 
     if args.evaluate_model:
-        evaluate_model(model, features_test, labels_test, args.tile_size,
-                       model_dir, out_format=args.out_format)
+        model.evaluate(
+            features_test, 
+            labels_test, 
+            out_format = args.out_format)
+        
+    # Save the Model object.
+    model.save()
 
 
 if __name__ == '__main__':
