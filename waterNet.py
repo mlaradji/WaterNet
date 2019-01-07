@@ -9,7 +9,14 @@ import waterNet.hyperparameters as hp
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Train a convolutional neural network to predict water in satellite images.")
-
+    
+    parser.add_argument(
+        "-r, --rastervision",
+        dest="use_rastervision",
+        action="store_const",
+        const=True,
+        default=False,
+        help="When selected, use rastervision for all post-preprocessing. Note that, other than `-p`, all subsequent arguments will be ignored.")
     parser.add_argument(
         "-p, --preprocess-data",
         dest="preprocess_data",
